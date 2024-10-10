@@ -32,7 +32,7 @@ def receive_file(client_socket):
 
     elif msg.decode('utf-8') == "File exists": #If the file exists start download
         print(msg)
-        file_size = int(client_socket.recv(1024).decode('utf-8'))
+        file_size = int(client_socket.recv(1024).decode('utf-8')) #Get the file size of the file
         bytes_received = 0
 
         with open(filename, 'wb') as file:  # Open the file to save it locally
