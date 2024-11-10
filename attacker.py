@@ -1,4 +1,5 @@
 import socket
+from tqdm import tqdm
 
 def handle_command(client_socket):
     while True:
