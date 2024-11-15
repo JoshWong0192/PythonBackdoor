@@ -16,6 +16,7 @@ def execute_system_command(command):
 def send_file(conn):
     filename = conn.recv(1024).decode('utf-8')
     print(f"The Filename is: {filename}")
+
     if os.path.exists(filename):
 
         conn.send("File exists".encode('utf-8'))
@@ -53,19 +54,27 @@ def receive_file(conn):
     print("Receiving Files...")
     filename = conn.recv(1024).decode('utf-8')
     print(f"Filename: {filename}")
+
     file_size = int(conn.recv(1024).decode('utf-8'))  # Get the file size of the file
-    bytes_received = 0
 
-    with open(filename, 'wb') as file:  # Open the file to save it locally
-            while bytes_received < file_size:
-                chunk = conn.recv(1024)
+    print(f"Filesize: {file_size}")
 
-                file.write(chunk)
+    msg = conn.recv(1024)
 
-                bytes_received += len(chunk)
-                print(f"Received {bytes_received}/{file_size} bytes")
+    if msg.decode('utf-8') == "y":
+        bytes_received = 0
 
-    print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
+        with open(filename, 'wb') as file:  # Open the file to save it locally
+                while bytes_received < file_size:
+                    chunk = conn.recv(1024)
+
+                    file.write(chunk)
+
+                    bytes_received += len(chunk)
+                    print(f"Received {bytes_received}/{file_size} bytes")
+
+        print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
+
     handle_commands(conn)
 
 # Function to handle all incoming commands in a loop
