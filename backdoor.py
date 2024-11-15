@@ -74,8 +74,13 @@ def receive_file(conn):
                     print(f"Received {bytes_received}/{file_size} bytes")
 
         print(f"File {filename} received successfully. Total bytes received: {bytes_received}")
+        handle_commands(conn)
 
-    handle_commands(conn)
+    elif msg.decode('utf-8') == "n":
+        print("Exiting receive file mode...")
+        handle_commands(conn)
+
+
 
 # Function to handle all incoming commands in a loop
 def handle_commands(conn):
